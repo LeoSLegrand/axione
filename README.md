@@ -1,5 +1,8 @@
 # Axione Athletics
 
+[![CI](https://github.com/LeoSLegrand/axione/actions/workflows/ci.yml/badge.svg)](https://github.com/LeoSLegrand/axione/actions/workflows/ci.yml)
+[![Main](https://github.com/LeoSLegrand/axione/actions/workflows/main.yml/badge.svg)](https://github.com/LeoSLegrand/axione/actions/workflows/main.yml)
+
 Site vitrine et boutique de vêtements de sport connectés (LED intégrées) pour la pratique nocturne : running, cyclisme, trail.
 
 Prototype réalisé dans le cadre du MBA Développeur Full Stack (M2).
