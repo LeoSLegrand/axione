@@ -1,4 +1,4 @@
-import { createPrismaClient } from "../src/client.js";
+import { createPrismaClient } from "../src/client";
 
 const collections = [
   { slug: "running", name: "Running", position: 1 },
