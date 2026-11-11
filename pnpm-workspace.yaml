@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+  - e2e
+
+catalog:
+  "@eslint/js": 9.39.5
+  "@types/node": 26.6.6
+  dependency-cruiser: 18.7.2
+  eslint: 9.39.5
+  eslint-config-prettier: 10.1.8
+  globals: 16.5.0
+  prettier: 3.9.10
+  typescript: 6.0.3
+  typescript-eslint: 8.72.2
