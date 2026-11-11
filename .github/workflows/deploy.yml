@@ -1,0 +1,72 @@
+# Manual deployment of an image already built and tested on main (DEC-012, DEC-014).
+# Each GitHub environment (staging, production) holds its own SSH secrets; production
+# requires an approval configured in the repository settings.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [staging, production]
+        required: true
+      image_tag:
+        description: Image tag to deploy (commit SHA built by the Main workflow)
+        type: string
+        required: true
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.image_tag }} to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Copy deployment files
+        env:
+          TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          APP_DIR: /opt/axione/${{ inputs.environment }}
+        run: |
+          ssh -i ~/.ssh/id_deploy "$TARGET" "mkdir -p $APP_DIR/ops/caddy"
+          scp -i ~/.ssh/id_deploy compose.prod.yaml "$TARGET:$APP_DIR/compose.prod.yaml"
+          scp -i ~/.ssh/id_deploy ops/caddy/Caddyfile "$TARGET:$APP_DIR/ops/caddy/Caddyfile"
+          scp -i ~/.ssh/id_deploy ops/deploy.sh "$TARGET:$APP_DIR/deploy.sh"
+
+      - name: Deploy
+        env:
+          TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          APP_DIR: /opt/axione/${{ inputs.environment }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The short-lived job token lets the server pull the private images, then expires.
+          printf '%s' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/id_deploy "$TARGET" \
+            "docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
+          ssh -i ~/.ssh/id_deploy "$TARGET" \
+            "bash $APP_DIR/deploy.sh '${{ inputs.environment }}' '${{ inputs.image_tag }}'"
+
+      - name: Remove credentials
+        if: always()
+        run: rm -f ~/.ssh/id_deploy
