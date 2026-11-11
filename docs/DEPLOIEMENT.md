@@ -1,34 +1,40 @@
 # Déploiement, CI/CD et coûts
 
-Statut : proposition de départ. Rien ici n'est validé tant que la décision correspondante n'est pas marquée "Validée" dans DECISION.md (DEC-012 à DEC-014, DEC-022, DEC-023). Les prix ont été relevés en novembre 2026 sur des pages d'hébergeurs et des comparateurs tiers. Ils changent souvent : les confirmer sur le site de l'hébergeur avant de les citer au jury.
+Statut au 2026-11-11 : mode de déploiement, environnements et hébergeur cible tranchés (DEC-012 à DEC-014). Supervision, sauvegardes et nom de domaine restent à trancher (DEC-022, DEC-023). Les prix ont été relevés en novembre 2026 sur des pages d'hébergeurs et des comparateurs tiers. Ils changent souvent : les confirmer sur le site de l'hébergeur avant de les citer au jury.
 
 ## 1. Principes
 
-- Hébergement dans l'Union européenne (DEC-004 validée), pour la défense RGPD.
-- Une image Docker construite une seule fois par la CI, puis déployée telle quelle sur chaque environnement.
-- Aucun secret dans le dépôt : variables dans les environnements GitHub et sur le serveur.
-- Déploiement reproductible par scripts (ops), retour arrière possible en redéployant l'image précédente.
-- Budget cible pour la démo de mars : au plus 30 € par mois. Pour le jury, aucun nom de domaine n'est nécessaire.
+- Hébergement dans l'Union européenne (DEC-004), pour la défense RGPD.
+- Docker Compose sur un VPS, derrière Caddy (reverse proxy et TLS automatique). Deux images construites une seule fois par la CI et déployées telles quelles : `axione-web` (application) et `axione-migrate` (migrations Prisma, exécutées une fois avant chaque démarrage de l'application).
+- Aucun secret dans le dépôt : variables dans les environnements GitHub et dans un fichier d'environnement sur le serveur.
+- Déploiement reproductible par scripts (ops/), retour arrière automatique vers l'image précédente si le déploiement échoue.
+- Mode "à la demande" jusqu'en mars : aucun serveur permanent avant la préparation de la soutenance. La CI prouve la déployabilité à chaque fusion dans main en lançant la pile complète sur son runner. Un VPS réel n'est loué que pour des essais ponctuels (fin de phase 0, fin de phase 2, février), puis pour la démonstration.
+- Scripts d'infrastructure génériques (Ubuntu et Docker, aucune API propre à un hébergeur) : changer d'hébergeur revient à relancer le provisionnement ailleurs.
+- Budget cible pour la démonstration de mars : au plus 30 € par mois. Pour le jury, aucun nom de domaine n'est nécessaire.
 
-## 2. Environnements proposés (DEC-014 à valider)
+## 2. Environnements (DEC-014)
 
-| Environnement | Rôle | Déclencheur |
-|---|---|---|
-| Local | Développement | Docker Compose |
-| CI | Tests automatisés sur base jetable | Chaque push et pull request |
-| Staging | Recette, tests e2e, accessibilité, démonstration au jury | Fusion dans main |
-| Production | Version présentée comme "en ligne" | Tag de version ou validation manuelle |
+| Environnement | Rôle | Où | Déclencheur |
+|---|---|---|---|
+| Local | Développement | Poste du développeur : `compose.dev.yaml` (PostgreSQL), `pnpm dev` | Manuel |
+| CI | Lint, types, tests unitaires et d'intégration sur base jetable | Runner GitHub Actions | Chaque pull request et chaque push sur main |
+| Staging éphémère | Pile complète construite à partir des images publiées : e2e, axe, Lighthouse | Runner GitHub Actions, détruite à la fin du job | Chaque fusion dans main |
+| Staging réel | Recette sur un vrai serveur, démonstration | VPS, à partir de février | Workflow Deploy manuel |
+| Production | Version présentée comme "en ligne" | Même VPS que le staging réel, à partir de février | Workflow Deploy manuel, avec approbation (environnement GitHub protégé) |
 
-Montrer qu'on déploie d'abord sur staging, puis seulement après vérification sur production, est un bon argument de maturité pour le jury. Pour un budget minimal, staging et production peuvent partager un même serveur (deux piles Docker Compose isolées).
+Staging et production sur le même serveur : deux piles Compose isolées (nom de projet, réseaux, volumes et bases distincts). Point à régler en février : un seul Caddy partagé devra router les deux noms d'hôte, car deux piles ne peuvent pas publier toutes deux les ports 80 et 443.
 
 ## 3. Pipeline CI/CD (GitHub Actions)
 
-1. Pull request : installation avec cache, lint, typecheck, tests unitaires et d'intégration (base PostgreSQL de test en service), build, audit des dépendances, envoi de la couverture, analyse de qualité (DEC-011).
-2. Fusion dans main : construction des images, publication dans le registre de GitHub (GHCR), migrations de base, déploiement sur staging, tests e2e Playwright, contrôles axe et Lighthouse sur staging.
-3. Production : déclenchée par un tag ou une approbation manuelle (environnement GitHub protégé), même image que staging, test de fumée, retour arrière par redéploiement du tag précédent.
-4. Planifié : sauvegarde nocturne de la base vers un stockage objet, veille sur les dépendances.
+| Workflow | Déclencheur | Étapes |
+|---|---|---|
+| `.github/workflows/ci.yml` | Pull request, push sur main | Installation avec cache, génération du client Prisma, lint, formatage, types, frontière d'architecture, tests unitaires et d'intégration (service PostgreSQL 18) avec seuil de couverture, build, audit des dépendances, analyse SonarQube Cloud (quality gate sur le code nouveau) |
+| `.github/workflows/main.yml` | Push sur main | Construction des images web et migrate, publication dans GHCR (tag = SHA du commit), puis staging éphémère : pile complète lancée avec ces images, migrations, e2e Playwright, audit axe, Lighthouse CI, rapports en artefacts |
+| `.github/workflows/deploy.yml` | Manuel (environnement et tag choisis) | Copie des fichiers de déploiement par SSH, connexion du serveur au registre avec le jeton éphémère du job, `ops/deploy.sh` (pull, migrations, démarrage, test de santé, retour arrière automatique en cas d'échec) |
 
-Cible : moins de 8 minutes pour les étapes de la pull request.
+Cible : moins de 8 minutes pour le workflow CI (NF-10). Turborepo n'est ajouté que si cette cible est dépassée (DEC-009).
+
+À venir : sauvegarde nocturne de la base vers un stockage objet et veille sur les dépendances (DEC-022).
 
 ## 4. Alternatives à la CI GitHub Actions (à citer dans le dossier)
 
@@ -37,37 +43,41 @@ Cible : moins de 8 minutes pour les étapes de la pull request.
 - CircleCI : service tiers supplémentaire sans avantage décisif ici.
 Choix : GitHub Actions (DEC-003 validée), car le code est déjà sur GitHub et qu'aucun serveur de CI n'est à maintenir.
 
-## 5. Schéma d'infrastructure (proposition)
+## 5. Schéma d'infrastructure
 
 ```mermaid
 flowchart LR
-  U["Navigateur"] -->|HTTPS| RP["Caddy : reverse proxy et TLS"]
-  subgraph vps["VPS en Union europeenne"]
-    RP --> WEB["Next.js web"]
-    RP --> API["API Node.js"]
-    WEB --> API
-    API --> DB[("PostgreSQL")]
-    API --> OBJ[("Stockage objet compatible S3")]
+  U["Navigateur"] -->|"HTTPS 443"| RP["Caddy : reverse proxy, TLS, en-têtes"]
+  subgraph vps["VPS en Union européenne (Ubuntu, Docker, pare-feu SSH HTTP HTTPS)"]
+    subgraph front["Réseau frontend"]
+      RP --> WEB["Next.js (image axione-web)"]
+    end
+    subgraph back["Réseau backend, sans accès internet"]
+      WEB --> DB[("PostgreSQL 18, volume persistant")]
+      MIG["Migrations (image axione-migrate, ponctuel)"] --> DB
+    end
   end
-  API -->|"paiements et webhooks"| STRIPE["Stripe mode test"]
-  API --> MAIL["Service email europeen"]
-  U -.-> ANA["Analytics sans cookie UE"]
-  GH["GitHub Actions"] -->|"image Docker et deploiement SSH"| vps
+  WEB -.->|"phases suivantes"| STRIPE["Stripe mode test"]
+  WEB -.->|"phases suivantes"| MAIL["Service email européen"]
+  GH["GitHub Actions"] -->|"images"| GHCR["GHCR"]
+  GHCR -->|"docker pull"| vps
+  GH -->|"déploiement SSH"| vps
 ```
 
-L'architecture exacte dépend de DEC-006 (une application Next.js seule, ou Next.js plus API Node séparée).
+L'application est une seule image Next.js (architecture décrite dans docs/ARCHITECTURE.md). Seul Caddy publie des ports ; la base n'est joignable que depuis le réseau interne. Docker contournant les règles UFW pour les ports publiés, aucun autre conteneur ne doit publier de port.
 
-## 6. Hébergeurs européens comparés (relevés novembre 2026)
+## 6. Hébergeurs européens comparés (relevés novembre 2026, DEC-013)
 
-| Hébergeur | Pays | Offre relevée | Ressources | Prix mensuel relevé | À savoir |
-|---|---|---|---|---|---|
-| OVHcloud | France | VPS-2 | 4 vCore, 8 Go, 75 Go NVMe | 8,49 € (VPS-1 : 2 vCore, 4 Go, 4,49 €) | Hausse de prix rapportée en mars 2026 sur la gamme VPS. Support jugé inégal par les avis. Les prix varient selon les sources et la région |
-| Hetzner | Allemagne, Finlande | CX33 | 4 vCPU, 8 Go, 80 Go | 6,49 € HT plus 0,50 € pour l'IPv4. Sauvegardes : plus 20 % | Facturation à l'heure, 20 To de trafic inclus. Plusieurs sources signalent des hausses en 2026 et des problèmes de disponibilité des plans CX : vérifier avant de choisir |
-| Scaleway | France | DEV1-M (3 vCPU, 4 Go) environ 14 €. DEV1-L (4 vCPU, 8 Go) environ 30 € | Gamme DEV1, à comparer aux gammes plus récentes | De 14 à 30 € | Facturation à l'heure, forte image "cloud français", plus cher à ressources égales |
-| Hostinger | Lituanie (siège) | KVM 2 | 2 vCPU, 8 Go, 100 Go NVMe | De 6,29 à 8,99 $ avec engagement de 24 mois, environ 15 $ au renouvellement, 24,49 $ sans engagement | Prix d'appel qui doublent au renouvellement. Envoi d'emails sortants limité par serveur : prévoir un service d'email externe. Emplacements des datacenters à vérifier |
-| Vercel (plan B pour la démo) | États-Unis, régions UE disponibles | Pro | Service managé pour Next.js | 20 $ par utilisateur et par mois. Le plan gratuit Hobby est réservé à un usage personnel non commercial | Très simple, mais hébergeur hors UE : argument RGPD plus faible, moins de contrôle, hors du budget pour un site marchand |
+Critère retenu : le coût réel d'exploitation pour une entreprise, au mois et à l'année, renouvellement compris, pour un VPS d'environ 8 Go accueillant staging et production.
 
-Lecture : pour une démonstration, un VPS de 4 vCPU et 8 Go chez un hébergeur de l'UE suffit largement et coûte entre 6,5 et 8,5 € par mois. La comparaison utile pour le jury porte sur le prix, la localisation des données, le support, l'écosystème (stockage objet, bases managées) et le temps d'exploitation que cela représente pour une seule personne.
+| Hébergeur | Pays | Offre | Ressources | Prix relevé (HT) | Coût annuel estimé | À savoir |
+|---|---|---|---|---|---|---|
+| OVHcloud (cible provisoire) | France | VPS-2 | 4 vCore, 8 Go, 75 Go NVMe | Environ 7,2 € par mois avec engagement de 12 mois, de 8,5 à 10 € sans engagement selon la gamme | Environ 87 à 120 € | Anti-DDoS inclus, stockage objet S3, PostgreSQL managé et répartiteur disponibles pour la montée en charge. Hausse de prix au printemps 2026, grilles 2026 et 2027 qui se chevauchent, support jugé inégal |
+| Hetzner | Allemagne, Finlande | CX33 | 4 vCPU, 8 Go, 80 Go | 8,99 € par mois IPv4 compris (hausse de 31 % en juin 2026), sauvegardes plus 20 % | Environ 108 € | Très bon rapport prix et performance, pas de base managée, gamme CX signalée indisponible à la commande à l'automne 2026 |
+| Hostinger | Lituanie (siège) | KVM 2 | 2 vCPU, 8 Go, 100 Go | 8,99 $ par mois prépayés sur 24 mois, puis 14,99 $ au renouvellement | Environ 180 $ après la première période | Prix d'appel qui doublent, facturation en dollars, emplacement UE à vérifier, envoi de courriels limité |
+| Scaleway | France | DEV1-L | 4 vCPU, 8 Go | Environ 31 € par mois | Environ 375 € | Écosystème cloud le plus riche, au-dessus du budget |
+
+Choix provisoire : OVHcloud VPS-2, comparaison refaite en février avec les grilles officielles du moment.
 
 ## 7. Nom de domaine
 
@@ -80,11 +90,13 @@ Les lignes marquées "estimation" ne sont pas sourcées et doivent être confirm
 ### Scénario A : démonstration au jury (mars 2027)
 | Poste | Mensuel |
 |---|---|
-| VPS UE de 4 vCPU et 8 Go (staging et production sur le même serveur) | De 6,5 à 8,5 € |
-| Sauvegardes du serveur | Environ 1,3 à 1,7 € (20 % chez Hetzner) |
+| Novembre à janvier : aucun serveur permanent (staging éphémère en CI) | 0 € |
+| Essais ponctuels sur un VPS (fin de phase 0, fin de phase 2), environ un mois sans engagement chacun | Environ 9 € par essai |
+| À partir de février : VPS UE de 4 vCore et 8 Go (staging et production) | Environ 7,2 à 10 € |
+| Sauvegardes et stockage objet | À chiffrer avec DEC-022 |
 | Domaine (optionnel) | Environ 0,6 € |
-| GitHub Actions, GHCR, Stripe en mode test | 0 € dans les quotas gratuits (à vérifier) |
-| Total | Environ 8 à 11 € |
+| GitHub Actions, GHCR, SonarQube Cloud, Stripe en mode test | 0 € dans les quotas gratuits |
+| Total en régime de démonstration | Environ 8 à 11 € par mois |
 
 ### Scénario B : lancement réel d'Axione (projection pour le dossier)
 | Poste | Mensuel (estimation) |
@@ -101,17 +113,22 @@ Frais de paiement Stripe : proportionnels au montant plus un montant fixe par tr
 
 ### Scénario C : montée en charge (argument d'évolutivité)
 1. Mise à l'échelle verticale : passer à un serveur plus gros (changement de gamme chez l'hébergeur).
-2. Séparer le web, l'API et la base sur des serveurs distincts, avec une base managée (offre à vérifier chez l'hébergeur retenu).
-3. Plusieurs instances web et API derrière un répartiteur de charge (environ 5,4 à 6 € par mois chez Hetzner), cache HTTP et CDN pour les médias.
+2. Séparer l'application et la base sur des serveurs distincts, avec une base managée (offre à vérifier chez l'hébergeur retenu).
+3. Plusieurs instances de l'application derrière un répartiteur de charge (environ 5,4 à 6 € par mois chez Hetzner), cache HTTP et CDN pour les médias.
 4. Réplique de lecture de la base, files d'attente pour les emails.
 5. Orchestration de conteneurs seulement si l'équipe et le trafic le justifient (hors périmètre du prototype, à citer comme horizon).
-Cela est possible parce que l'API est sans état (NF-05) et que les médias sont hors du serveur applicatif.
+Cela est possible parce que l'application est sans état (NF-05) et que les médias sont hors du serveur applicatif.
 
 ## 9. Sauvegardes, supervision, reprise
 
 - Sauvegarde nocturne de la base (dump chiffré) vers un stockage objet en UE, rotation de 7 à 30 jours, test de restauration documenté.
 - Endpoint `/health`, supervision de disponibilité et suivi d'erreurs (DEC-022).
-- Reprise après sinistre : un serveur neuf se reconstruit avec le script de provisionnement, les images viennent du registre, la base se restaure depuis le dernier dump. Objectif à documenter : durée de reconstruction.
+- Reprise après sinistre : un serveur neuf se reconstruit avec `ops/provision.sh`, les images viennent du registre, la base se restaure depuis le dernier dump.
+- Durée de reconstruction mesurée à chaque location d'un VPS :
+
+| Date | Hébergeur | Étapes | Durée | Remarques |
+|---|---|---|---|---|
+| (premier essai en fin de phase 0) | | | | |
 
 ## 10. À vérifier avant la soutenance
 

@@ -79,7 +79,7 @@ Livrer un prototype déployé et fonctionnel : vitrine Axione, boutique de 3 gam
 ### Objectif secondaire
 | ID | Exigence | Prio | Phase |
 |---|---|---|---|
-| F-50 | Application mobile Expo : périmètre à redéfinir à partir des maquettes du M1 (connexion et inscription, tableau de bord avec choix de couleur des LED simulé, suivi d'activités simulé), réutilisant l'API | C | 6 |
+| F-50 | Application mobile Expo : périmètre à redéfinir à partir des maquettes du M1 (connexion et inscription, tableau de bord avec choix de couleur des LED simulé, suivi d'activités simulé), réutilisant les cas d'usage de packages/core via une API REST (chemin d'extraction décrit dans docs/ARCHITECTURE.md) | C | 6 |
 
 ## 4. Exigences non fonctionnelles
 
@@ -91,9 +91,9 @@ Les seuils sont des cibles proposées, à valider par l'auteur.
 | NF-02 | Accessibilité | Visée WCAG 2.2 AA et RGAA. Zéro violation axe critique ou sérieuse sur les parcours clés. Lighthouse accessibilité de 95 ou plus. Navigation clavier complète, focus visible, `prefers-reduced-motion` respecté |
 | NF-03 | Sécurité | OWASP Top 10 pris en compte : mots de passe hachés (argon2id ou bcrypt), HTTPS uniquement, en-têtes de sécurité (CSP, HSTS), limitation de débit sur authentification et newsletter, validation des entrées côté serveur, protection CSRF, secrets hors dépôt, audit des dépendances |
 | NF-04 | RGPD | Voir docs/RGPD.md : minimisation, consentement, droits des personnes, durées de conservation, sous-traitants documentés |
-| NF-05 | Scalabilité | API sans état, configuration par variables d'environnement (12 facteurs), médias hors du serveur applicatif, cache HTTP, pagination, index en base. Montée en charge décrite dans docs/DEPLOIEMENT.md |
+| NF-05 | Scalabilité | Application sans état, configuration par variables d'environnement (12 facteurs), médias hors du serveur applicatif, cache HTTP, pagination, index en base. Montée en charge décrite dans docs/DEPLOIEMENT.md |
 | NF-06 | Qualité de code | TypeScript strict, lint sans erreur, formatage automatique, couverture de tests de 80 % ou plus sur la logique métier (seuil bloquant en CI) |
-| NF-07 | Observabilité | Logs structurés, endpoint de santé `/health`, suivi des erreurs |
+| NF-07 | Observabilité | Logs structurés, endpoint de santé `/api/health`, suivi des erreurs |
 | NF-08 | SEO | Rendu serveur, métadonnées, sitemap, Open Graph |
 | NF-09 | Compatibilité | Navigateurs récents, conception mobile d'abord |
 | NF-10 | CI | Pipeline complet en moins de 8 minutes pour pouvoir le montrer en direct |
@@ -130,7 +130,7 @@ Les périodes de fêtes (phase 2) sont comptées plus légères. Si un retard ap
 
 ## 8. Définition du walking skeleton (phase 0)
 
-Le plus petit système de bout en bout : monorepo installé, une page web minimale et un endpoint `/health` de l'API, un test unitaire, un test d'intégration, un test e2e de fumée, lint et typecheck, CI GitHub Actions verte, image Docker construite, déploiement automatique sur un environnement de test accessible. Tout ce qui suit s'appuie dessus : on ne développe pas de fonctionnalité avant qu'il soit vert.
+Le plus petit système de bout en bout : monorepo installé, une page web minimale et un endpoint `/api/health` de l'application Next.js, un test unitaire, un test d'intégration, un test e2e de fumée, lint et typecheck, CI GitHub Actions verte, image Docker construite, déploiement automatique sur un environnement de test accessible. Tout ce qui suit s'appuie dessus : on ne développe pas de fonctionnalité avant qu'il soit vert.
 
 ## 9. Questions ouvertes
 
