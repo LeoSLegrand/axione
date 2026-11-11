@@ -9,13 +9,16 @@ allowBuilds:
   prisma: true
 
 catalog:
+  "@axe-core/playwright": 4.14.0
   "@eslint/js": 9.39.5
+  "@playwright/test": 1.65.0
   "@prisma/adapter-pg": 7.10.1
   "@prisma/client": 7.10.1
   "@types/node": 24.19.2
   "@types/pg": 8.23.1
   "@types/react": 19.3.0
   "@types/react-dom": 19.3.0
+  "@vitest/coverage-v8": 5.1.0
   dependency-cruiser: 18.7.2
   dotenv: 18.0.10
   eslint-config-next: 16.4.6
@@ -32,3 +35,4 @@ catalog:
   tsx: 4.23.15
   typescript-eslint: 8.72.2
   typescript: 6.0.3
+  vitest: 5.1.0

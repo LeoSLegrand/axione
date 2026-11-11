@@ -11,26 +11,34 @@
     "build": "pnpm --filter @axione/web build",
     "lint": "eslint .",
     "check:boundaries": "depcruise apps packages --config .dependency-cruiser.cjs",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @axione/db db:generate",
     "db:migrate": "pnpm --filter @axione/db db:migrate",
     "db:deploy": "pnpm --filter @axione/db db:deploy",
     "db:seed": "pnpm --filter @axione/db db:seed",
-    "start": "pnpm --filter @axione/web start"
+    "start": "pnpm --filter @axione/web start",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "pnpm --filter @axione/e2e test"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
     "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "dependency-cruiser": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-jsx-a11y": "catalog:",
     "globals": "catalog:",
+    "pg": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:"
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
   }
 }
