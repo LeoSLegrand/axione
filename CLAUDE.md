@@ -70,7 +70,23 @@ Garde la CI rapide (cible : moins de 8 minutes). Elle sera déclenchée en direc
 
 ## Commandes
 
-À compléter par l'agent en phase 0 (installation, dev, test, lint, typecheck, build, e2e) dès que le monorepo existe.
+Prérequis : Node 24 LTS (Node 26 toléré en local), pnpm 11, Docker. PostgreSQL de développement sur le port 54329 (le 5432 est pris sur le poste), application sur le port 3100.
+
+| Besoin | Commande |
+|---|---|
+| Installation | `pnpm install` |
+| Base locale | `docker compose -f compose.dev.yaml up -d` |
+| Client Prisma | `pnpm db:generate` (n'est plus automatique en Prisma 7) |
+| Migrations | `pnpm db:migrate` (développement), `pnpm db:deploy` (appliquer) |
+| Développement | `pnpm dev` |
+| Lint, formatage, types | `pnpm lint`, `pnpm format:check`, `pnpm typecheck` |
+| Frontière d'architecture | `pnpm check:boundaries` |
+| Tests | `pnpm test`, `pnpm test:integration`, `pnpm test:coverage` |
+| Build | `pnpm build` |
+| e2e | `pnpm test:e2e` (après `pnpm build`), ou `E2E_BASE_URL=... pnpm test:e2e` contre une pile déployée |
+| Pile de production locale | `POSTGRES_PASSWORD=... HTTP_PORT=8080 HTTPS_PORT=8443 docker compose -p axione-local -f compose.prod.yaml up -d --wait` |
+
+Pièges connus : imports relatifs sans extension dans les packages (Turbopack ne résout pas `.js` vers `.ts`) ; ne jamais lire les fichiers `.env*` (règle de permission) ; ESLint 9 et TypeScript 6 figés tant que les plugins ne supportent pas ESLint 10 et TypeScript 7.
 
 ## Par où commencer
 

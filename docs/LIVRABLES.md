@@ -9,10 +9,10 @@ Rendu : lundi 1er mars 2027, dossier et accès au code source. Dépôt GitHub pr
 | Attendu | Preuve dans le dépôt | Statut |
 |---|---|---|
 | Spécifications techniques couvrant l'expression des besoins | docs/SPECS.md (exigences F-xx et NF-xx, parcours, modèle de données) | [ ] |
-| Architecture technique évolutive et scalable | docs/ARCHITECTURE.md (à créer en phase 0 : schéma, composants, flux, stratégie de montée en charge) | [ ] |
+| Architecture technique évolutive et scalable | docs/ARCHITECTURE.md (schéma, composants, règles, flux, montée en charge, chemin d'extraction d'une API) | [x] version phase 0 |
 | Synthèse des choix techniques justifiés | DECISION.md (local, repris dans le Word) | [ ] |
-| Schéma de l'infrastructure de déploiement | docs/DEPLOIEMENT.md (schéma Mermaid, à valider après DEC-012 et DEC-013) | [ ] |
-| Choix justifié de la plateforme de test et d'intégration et déploiement continus | DEC-003 et DEC-014, pipeline dans .github/workflows | [ ] |
+| Schéma de l'infrastructure de déploiement | docs/DEPLOIEMENT.md §5 (schéma Mermaid) | [x] |
+| Choix justifié de la plateforme de test et d'intégration et déploiement continus | DEC-003, DEC-010 à DEC-014, pipeline dans .github/workflows (ci.yml, main.yml, deploy.yml) | [x] |
 
 ## 2. Test et recettage
 
@@ -27,7 +27,7 @@ Rendu : lundi 1er mars 2027, dossier et accès au code source. Dépôt GitHub pr
 
 | Attendu | Preuve dans le dépôt | Statut |
 |---|---|---|
-| Environnement de déploiement pour les tests et le CI/CD | docs/DEPLOIEMENT.md, .github/workflows, scripts de déploiement | [ ] |
+| Environnement de déploiement pour les tests et le CI/CD | docs/DEPLOIEMENT.md, .github/workflows, Dockerfile, compose.prod.yaml, ops/ (provisionnement, déploiement, Caddy) | [ ] essai sur VPS réel à faire |
 | Document décrivant la mise en application du RGPD | docs/RGPD.md (registre, droits, sous-traitants, durées, consentement) | [ ] |
 | Lien vers l'intégralité du code source | Dépôt GitHub public à partir du gel du code | [ ] |
 | Implémentation de l'accessibilité | docs/ACCESSIBILITE.md (mesures prises, résultats axe et Lighthouse, limites connues) | [ ] |
