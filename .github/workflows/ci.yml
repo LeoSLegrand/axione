@@ -16,7 +16,7 @@ permissions:
 jobs:
   quality:
     name: Lint, types, tests, build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
       postgres:
@@ -33,6 +33,7 @@ jobs:
     env:
       TEST_DATABASE_URL: postgresql://axione:axione@localhost:5432/axione_test
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_SCANNER_VERSION: 8.3.1.16491
     steps:
       - uses: actions/checkout@v7
         with:
@@ -80,12 +81,23 @@ jobs:
           path: coverage/
           retention-days: 30
 
+      # The scan action verifies the scanner signature with a key fetched from a public keyserver,
+      # without timeout. Caching the verified scanner avoids that network call on most runs.
+      - name: Restore SonarQube scanner
+        if: env.SONAR_TOKEN != ''
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.tool_cache }}/sonar-scanner-cli
+          key: sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+
       - name: SonarQube Cloud analysis
         if: env.SONAR_TOKEN != ''
+        timeout-minutes: 5
         uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          scannerVersion: ${{ env.SONAR_SCANNER_VERSION }}
           args: >-
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}

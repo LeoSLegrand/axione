@@ -18,7 +18,7 @@ permissions:
 jobs:
   images:
     name: Build and publish images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     outputs:
       web: ${{ steps.names.outputs.web }}
@@ -68,7 +68,7 @@ jobs:
   staging:
     name: Ephemeral staging (e2e, axe, Lighthouse)
     needs: images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       WEB_IMAGE: ${{ needs.images.outputs.web }}

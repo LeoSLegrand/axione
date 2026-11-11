@@ -57,7 +57,12 @@ Convention : chaque titre de test commence par l'identifiant de l'exigence couve
 
 ## 6. Rapports (à renseigner)
 
-- Dernière exécution de la CI : lien et date.
+- Exécutions de la CI (workflow ci.yml, cible NF-10 : moins de 8 minutes) :
+
+| Date | Branche | Durée | Résultat |
+|---|---|---|---|
+| 2026-11-11 | phase0/ci-check (PR #3) | 3 min 32 s | Vert, 13 tests, couverture de packages/core à 100 % |
+
 - Couverture : pourcentage par module.
 - Résultats axe et Lighthouse : scores et date.
 - Métriques de qualité de code : outil retenu (DEC-011) et valeurs.
