@@ -1,15 +1,15 @@
 # Stratégie de tests
 
-Squelette à compléter au fil du développement. Les outils sont à confirmer (DEC-010 et DEC-011). Le jury attend : scénarios fondés sur l'expression des besoins, rapport de couverture, preuve de non-régression, synthèse de recette.
+Document tenu à jour au fil du développement. Outils retenus : Vitest 5, Playwright et axe (DEC-010), SonarQube Cloud pour les métriques (DEC-011). Le jury attend : scénarios fondés sur l'expression des besoins, rapport de couverture, preuve de non-régression, synthèse de recette.
 
 ## 1. Niveaux de test
 
-| Niveau | But | Outils pressentis | Où | Quand |
+| Niveau | But | Outils | Où | Quand |
 |---|---|---|---|---|
-| Unitaire | Logique métier isolée (prix, panier, codes promo, validation) | Vitest | À côté du code | Chaque push |
-| Intégration | API et base de données réelles (jetables) | Vitest et Supertest, PostgreSQL de test | apps/api | Chaque push |
+| Unitaire | Logique métier isolée (prix, panier, codes promo, validation) | Vitest, fichiers `*.test.ts` | À côté du code, surtout packages/core | Chaque push |
+| Intégration | Cas d'usage de packages/core et Route Handlers sur base réelle jetable | Vitest, fichiers `*.int.test.ts`, PostgreSQL 18 de test (base `axione_test`, migrations rejouées avant chaque exécution) | packages/core, apps/web | Chaque push |
 | Composants | Rendu et accessibilité des composants | Testing Library, axe | apps/web | Chaque push |
-| End-to-end | Parcours P1 à P4 dans un vrai navigateur | Playwright | e2e/ | Après déploiement sur staging |
+| End-to-end | Parcours P1 à P4 dans un vrai navigateur | Playwright | e2e/ | Chaque push sur main, contre la pile Docker éphémère (staging en CI, DEC-014) |
 | Accessibilité | Violations automatisables | axe-core dans Playwright, Lighthouse CI | e2e/ | Staging |
 | Performance | Budgets Lighthouse sur la landing page et une fiche produit | Lighthouse CI | CI | Staging |
 | Sécurité | Dépendances, secrets, analyse statique | Audit npm, CodeQL, analyse de secrets | CI | Chaque pull request et planifié |
@@ -17,7 +17,7 @@ Squelette à compléter au fil du développement. Les outils sont à confirmer (
 
 ## 2. Objectifs de couverture (à valider)
 
-- 80 % de lignes ou plus sur la logique métier (API et bibliothèques partagées), seuil bloquant en CI.
+- 80 % ou plus (lignes, branches, fonctions, instructions) sur la logique métier (packages/core), seuil bloquant configuré dans vitest.config.ts.
 - Couverture globale suivie et affichée, sans objectif artificiel sur le code d'interface.
 - Parcours critiques P1 à P3 couverts en e2e.
 
@@ -44,7 +44,16 @@ La suite complète est rejouée à chaque push et pull request. Aucune fusion da
 
 | Exigence | Test | Type | Fichier | Statut |
 |---|---|---|---|---|
-| (à remplir) | | | | |
+| F-01 | La page d'accueil affiche la marque et les gammes | e2e | e2e/tests/smoke.spec.ts | Passe (squelette, à enrichir en phase 1) |
+| F-10 | Les gammes sont listées dans l'ordre d'affichage, catalogue vide, slug unique | Intégration | packages/core/src/catalog/collections.int.test.ts | Passe (socle) |
+| NF-02 | Aucune violation axe critique ou sérieuse sur l'accueil (WCAG 2.2 AA) | e2e | e2e/tests/smoke.spec.ts | Passe |
+| NF-06 | Couverture de packages/core au moins 80 % | Seuil Vitest | vitest.config.ts | 100 % au 2026-11-11 |
+| NF-07 | Agrégation de l'état de santé, sonde en échec, délai dépassé, exécution parallèle, aucune fuite d'erreur | Unitaire | packages/core/src/health.test.ts | Passe |
+| NF-07 | Sonde base de données joignable et injoignable | Intégration | packages/core/src/database-probe.int.test.ts | Passe |
+| NF-07 | `GET /api/health` répond 200, JSON, sans cache | Intégration | apps/web/src/app/api/health/route.int.test.ts | Passe |
+| NF-07 | `/api/health` répond 200 dans le navigateur | e2e | e2e/tests/smoke.spec.ts | Passe |
+
+Convention : chaque titre de test commence par l'identifiant de l'exigence couverte (par exemple `[NF-07]`), ce qui permet de retrouver la matrice à partir des rapports de la CI.
 
 ## 6. Rapports (à renseigner)
 
