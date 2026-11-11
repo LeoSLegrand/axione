@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+coverage/
+.next/
+**/generated/
+playwright-report/
+test-results/
+framer-reference/
+DECISION.md
+docs/
+*.md

@@ -1,0 +1,23 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["https://localhost:8443/"],
+      "numberOfRuns": 3,
+      "settings": {
+        "chromeFlags": "--headless=new --no-sandbox --ignore-certificate-errors"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.9, "aggregationMethod": "median" }],
+        "categories:accessibility": ["error", { "minScore": 0.95, "aggregationMethod": "median" }],
+        "categories:best-practices": ["warn", { "minScore": 0.9, "aggregationMethod": "median" }],
+        "categories:seo": ["warn", { "minScore": 0.9, "aggregationMethod": "median" }]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    }
+  }
+}
