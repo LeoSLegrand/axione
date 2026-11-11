@@ -1,0 +1,58 @@
+/* Brand tokens from the M1 style guide (docs/CONTEXTE.md). Never hard-code colours in components. */
+:root {
+  --color-night: #2a015b;
+  --color-cyan: #00cfff;
+  --color-blue: #6d85ff;
+  --color-pink: #f91dbf;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --gradient-signature: linear-gradient(
+    90deg,
+    var(--color-cyan),
+    var(--color-blue),
+    var(--color-pink)
+  );
+
+  --color-bg: var(--color-night);
+  --color-text: var(--color-white);
+  --color-accent: var(--color-cyan);
+  /* Dark text on cyan, blue and pink fills (contrast table in docs/CONTEXTE.md). */
+  --color-on-accent: var(--color-black);
+
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
