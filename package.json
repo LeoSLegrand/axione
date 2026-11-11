@@ -17,7 +17,6 @@
     "db:generate": "pnpm --filter @axione/db db:generate",
     "db:migrate": "pnpm --filter @axione/db db:migrate",
     "db:deploy": "pnpm --filter @axione/db db:deploy",
-    "db:seed": "pnpm --filter @axione/db db:seed",
     "start": "pnpm --filter @axione/web start",
     "test": "vitest run --project unit",
     "test:integration": "vitest run --project integration",

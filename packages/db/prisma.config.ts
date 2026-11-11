@@ -9,7 +9,6 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    seed: "tsx --env-file-if-exists=../../.env prisma/seed.ts",
   },
   datasource: {
     // Not env(): it throws when the variable is missing, which breaks `prisma generate`
