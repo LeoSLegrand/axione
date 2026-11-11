@@ -1,0 +1,45 @@
+# Documents personnels (ne jamais pousser)
+DECISION.md
+local/
+
+# Référence Framer du M1 (assets, vidéo, code exporté) : local uniquement
+framer-reference/
+
+# Secrets et environnement
+.env
+.env.*
+!.env.example
+
+# Dépendances et builds
+node_modules/
+.pnpm-store/
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Tests et rapports
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+
+# Logs et fichiers système
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Éditeur (garder .vscode/settings.json et extensions.json si partagés)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# Docker local
+docker-compose.override.yml
+
+# Paramètres Claude Code personnels (le fichier partagé settings.json reste versionné)
+.claude/settings.local.json
