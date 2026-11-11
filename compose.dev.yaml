@@ -1,0 +1,20 @@
+# Local development services. Usage: docker compose -f compose.dev.yaml up -d
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: axione
+      POSTGRES_PASSWORD: axione
+      POSTGRES_DB: axione
+    ports:
+      - "54329:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U axione -d axione"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
