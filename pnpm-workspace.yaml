@@ -3,13 +3,25 @@ packages:
   - packages/*
   - e2e
 
+allowBuilds:
+  "@prisma/engines": true
+  esbuild: true
+  prisma: true
+
 catalog:
   "@eslint/js": 9.39.5
+  "@prisma/adapter-pg": 7.10.1
+  "@prisma/client": 7.10.1
   "@types/node": 26.6.6
+  "@types/pg": 8.23.1
   dependency-cruiser: 18.7.2
+  dotenv: 18.0.10
   eslint: 9.39.5
   eslint-config-prettier: 10.1.8
   globals: 16.5.0
+  pg: 8.23.1
   prettier: 3.9.10
+  prisma: 7.10.1
+  tsx: 4.23.15
   typescript: 6.0.3
   typescript-eslint: 8.72.2

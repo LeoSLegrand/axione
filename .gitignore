@@ -43,3 +43,4 @@ docker-compose.override.yml
 
 # Paramètres Claude Code personnels (le fichier partagé settings.json reste versionné)
 .claude/settings.local.json
+**/src/generated/
