@@ -12,6 +12,8 @@ export default defineConfig({
   use: {
     baseURL: externalBaseUrl ?? `http://localhost:${port}`,
     trace: "retain-on-failure",
+    // The CI stack is served by Caddy with a certificate from its internal authority.
+    ignoreHTTPSErrors: process.env.E2E_IGNORE_HTTPS_ERRORS === "true",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   // Without E2E_BASE_URL, run against the locally built application (pnpm build first).
