@@ -61,7 +61,9 @@ Convention : chaque titre de test commence par l'identifiant de l'exigence couve
 
 | Date | Branche | Durée | Résultat |
 |---|---|---|---|
-| 2026-11-11 | phase0/ci-check (PR #3) | 3 min 32 s | Vert, 13 tests, couverture de packages/core à 100 % |
+| 2026-11-11 | phase0/ci-check (PR #2) | 3 min 32 s | Vert, 13 tests, couverture de packages/core à 100 % |
+| 2026-11-11 | phase0/ci-check (PR #2, analyse SonarQube ajoutée) | 2 min 38 s | Vert, quality gate passée |
+| 2026-11-11 | main (fusion de la PR #2) | 6 min 39 s | Échec : analyse SonarQube interrompue à 5 minutes (import de la clé de signature du scanner bloqué), corrigé par la clé figée dans le dépôt |
 
 - Couverture : pourcentage par module.
 - Résultats axe et Lighthouse : scores et date.
