@@ -81,14 +81,13 @@ jobs:
           path: coverage/
           retention-days: 30
 
-      # The scan action verifies the scanner signature with a key fetched from a public keyserver,
-      # without timeout. Caching the verified scanner avoids that network call on most runs.
-      - name: Restore SonarQube scanner
+      # The scan action fetches the signing key from a public keyserver without timeout, which hung
+      # the job. The scanner is installed beforehand and verified with the pinned SonarSource key,
+      # so the action finds it in the tool cache and contacts no keyserver.
+      - name: Install SonarQube scanner
         if: env.SONAR_TOKEN != ''
-        uses: actions/cache@v6
-        with:
-          path: ${{ runner.tool_cache }}/sonar-scanner-cli
-          key: sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+        timeout-minutes: 3
+        run: bash .github/scripts/install-sonar-scanner.sh
 
       - name: SonarQube Cloud analysis
         if: env.SONAR_TOKEN != ''
@@ -102,3 +101,4 @@ jobs:
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
             -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=180
